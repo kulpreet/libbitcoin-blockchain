@@ -1,44 +1,68 @@
-/////**
-//// * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
-//// *
-//// * This file is part of libbitcoin.
-//// *
-//// * This program is free software: you can redistribute it and/or modify
-//// * it under the terms of the GNU Affero General Public License as published by
-//// * the Free Software Foundation, either version 3 of the License, or
-//// * (at your option) any later version.
-//// *
-//// * This program is distributed in the hope that it will be useful,
-//// * but WITHOUT ANY WARRANTY; without even the implied warranty of
-//// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//// * GNU Affero General Public License for more details.
-//// *
-//// * You should have received a copy of the GNU Affero General Public License
-//// * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//// */
-////#include <boost/test/unit_test.hpp>
-////
-////#include <bitcoin/blockchain.hpp>
-////#include "utility.hpp"
-////
-////using namespace bc;
-////using namespace bc::blockchain;
-////using namespace bc::database;
-////
-////#define TEST_SET_NAME \
-////    "fast_chain_tests"
-////
-////class fast_chain_setup_fixture
-////{
-////public:
-////    fast_chain_setup_fixture()
-////    {
-////        log::initialize();
-////    }
-////};
-////
-////BOOST_FIXTURE_TEST_SUITE(fast_chain_tests, fast_chain_setup_fixture)
-////
+/**
+ * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <boost/test/unit_test.hpp>
+
+#include <bitcoin/blockchain.hpp>
+#include "../utility.hpp"
+
+using namespace bc;
+using namespace bc::system;
+using namespace bc::blockchain;
+using namespace bc::database;
+
+#define TEST_SET_NAME \
+   "fast_chain_tests"
+
+class fast_chain_setup_fixture
+{
+public:
+    fast_chain_setup_fixture()
+    {
+    }
+
+    ~fast_chain_setup_fixture()
+    {
+        test::remove_test_directory(TEST_NAME);
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(fast_chain_tests, fast_chain_setup_fixture)
+
+BOOST_AUTO_TEST_CASE(block_chain__get_top__no_gaps__last_block)
+{
+    START_BLOCKCHAIN(instance, false);
+
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+    const auto blocks = std::make_shared<const block_const_ptr_list_const_ptr>(block_const_ptr_list_const_ptr{ block1, block2 });
+
+    BOOST_REQUIRE(instance.reorganize(blocks, 0));
+
+    // Setup ends.
+
+    config::checkpoint top;
+    BOOST_REQUIRE(instance.get_top(top, true));
+
+    // Test conditions.
+    BOOST_REQUIRE_EQUAL(top.height(), 2u);
+}
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
@@ -220,20 +244,6 @@
 ////    BOOST_REQUIRE_EQUAL(version, block1->header().version());
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(block_chain__get_top__no_gaps__last_block)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    const auto block1 = NEW_BLOCK(1);
-////    const auto block2 = NEW_BLOCK(2);
-////    BOOST_REQUIRE(instance.push(block1, 1, 0));
-////    BOOST_REQUIRE(instance.push(block2, 2, 0));
-////
-////    config::checkpoint top;
-////    BOOST_REQUIRE(instance.get_top(top, false));
-////    BOOST_REQUIRE_EQUAL(top.height(), 2u);
-////}
-////
 ////BOOST_AUTO_TEST_CASE(block_chain__populate_output__not_found__false)
 ////{
 ////    START_BLOCKCHAIN(instance, false);
@@ -307,5 +317,4 @@
 ////    BOOST_REQUIRE(!outpoint.metadata.cache.is_valid());
 ////}
 ////
-////BOOST_AUTO_TEST_SUITE_END()
-////
+BOOST_AUTO_TEST_SUITE_END()

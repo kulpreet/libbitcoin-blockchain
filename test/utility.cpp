@@ -48,12 +48,20 @@ bool create_database(database::settings& out_database)
     out_database.file_growth_rate = 42;
     out_database.block_table_buckets = 42;
     out_database.transaction_table_buckets = 42;
+    out_database.address_table_buckets = 42;
 
     error_code ec;
     remove_all(out_database.directory, ec);
-    database::data_base database(out_database, false);
+    database::data_base database(out_database, true);
     return create_directories(out_database.directory, ec) &&
         database.create(system::settings(mainnet).genesis_block);
 }
+
+void remove_test_directory(std::string name)
+{
+    error_code ec;
+    remove_all(name, ec);
+}
+
 
 } // namespace test
