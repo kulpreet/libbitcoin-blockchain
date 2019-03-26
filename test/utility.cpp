@@ -57,11 +57,10 @@ bool create_database(database::settings& out_database)
         database.create(system::settings(mainnet).genesis_block);
 }
 
-void remove_test_directory(std::string name)
+void remove_test_directory(std::string directory)
 {
     error_code ec;
-    remove_all(name, ec);
+    remove_all(directory, ec);
 }
-
 
 } // namespace test

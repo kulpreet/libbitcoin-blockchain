@@ -402,6 +402,9 @@ protected:
         system::block_const_ptr_list_const_ptr incoming,
         system::block_const_ptr_list_const_ptr outgoing);
 
+    // This is protected by mutex.
+    database::data_base database_;
+
 private:
     // Properties.
     system::uint256_t candidate_work() const;
@@ -428,9 +431,6 @@ private:
         const database::block_result& result, bool witness) const;
     bool get_transaction_hashes(system::hash_list& out_hashes,
         const database::block_result& result) const;
-
-    // This is protected by mutex.
-    database::data_base database_;
 
     // These are thread safe.
     std::atomic<bool> stopped_;

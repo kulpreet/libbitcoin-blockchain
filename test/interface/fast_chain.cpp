@@ -29,11 +29,29 @@ using namespace bc::database;
 #define TEST_SET_NAME \
    "fast_chain_tests"
 
+class block_chain_accessor
+  : public block_chain
+{
+public:
+    block_chain_accessor(threadpool& pool, const blockchain::settings& settings,
+        const database::settings& database_settings,
+        const system::settings& bitcoin_settings)
+      : block_chain(pool, settings, database_settings, bitcoin_settings)
+    {
+    }
+
+    database::data_base& database()
+    {
+        return database_;
+    }
+};
+
 class fast_chain_setup_fixture
 {
 public:
     fast_chain_setup_fixture()
     {
+        test::remove_test_directory(TEST_NAME);
     }
 
     ~fast_chain_setup_fixture()
@@ -44,22 +62,48 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(fast_chain_tests, fast_chain_setup_fixture)
 
-BOOST_AUTO_TEST_CASE(block_chain__get_top__no_gaps__last_block)
+BOOST_AUTO_TEST_CASE(block_chain__get_top__candidate_and_confirmed__success)
 {
     START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+
+    auto& database = instance.database();
 
     const auto block1 = NEW_BLOCK(1);
     const auto block2 = NEW_BLOCK(2);
-    const auto blocks = std::make_shared<const block_const_ptr_list_const_ptr>(block_const_ptr_list_const_ptr{ block1, block2 });
 
-    BOOST_REQUIRE(instance.reorganize(blocks, 0));
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+        std::make_shared<const message::header>(block2->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
 
     // Setup ends.
 
+    // Test conditions.
     config::checkpoint top;
     BOOST_REQUIRE(instance.get_top(top, true));
+    BOOST_REQUIRE_EQUAL(top.height(), 2u);
+    BOOST_REQUIRE(instance.get_top(top, false));
+    BOOST_REQUIRE_EQUAL(top.height(), 0u);
+
+    // Confirm blocks
+    database.invalidate(block1->header(), error::success);
+    database.update(*block1, 1);
+    database.invalidate(block2->header(), error::success);
+    database.update(*block2, 2);
+    const auto incoming_blocks = std::make_shared<const block_const_ptr_list>(block_const_ptr_list{ block1, block2 });
+    const auto outgoing_blocks = std::make_shared<block_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_blocks, outgoing_blocks), error::success);
 
     // Test conditions.
+    BOOST_REQUIRE(instance.get_top(top, true));
+    BOOST_REQUIRE_EQUAL(top.height(), 2u);
+    BOOST_REQUIRE(instance.get_top(top, false));
     BOOST_REQUIRE_EQUAL(top.height(), 2u);
 }
 
