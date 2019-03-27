@@ -86,10 +86,23 @@ BOOST_AUTO_TEST_CASE(block_chain__get_top__candidate_and_confirmed__success)
 
     // Test conditions.
     config::checkpoint top;
+    chain::header out_header;
+    size_t out_height;
     BOOST_REQUIRE(instance.get_top(top, true));
     BOOST_REQUIRE_EQUAL(top.height(), 2u);
+    BOOST_REQUIRE(top.hash() == block2->hash());
+
+    BOOST_REQUIRE(instance.get_top(out_header, out_height, true));
+    BOOST_REQUIRE_EQUAL(out_height, 2u);
+    BOOST_REQUIRE(out_header.hash() == block2->hash());
+
     BOOST_REQUIRE(instance.get_top(top, false));
     BOOST_REQUIRE_EQUAL(top.height(), 0u);
+    BOOST_REQUIRE(top.hash() == genesis.hash());
+
+    BOOST_REQUIRE(instance.get_top(out_header, out_height, false));
+    BOOST_REQUIRE_EQUAL(out_height, 0u);
+    BOOST_REQUIRE(out_header.hash() == genesis.hash());
 
     // Confirm blocks
     database.invalidate(block1->header(), error::success);
@@ -103,8 +116,19 @@ BOOST_AUTO_TEST_CASE(block_chain__get_top__candidate_and_confirmed__success)
     // Test conditions.
     BOOST_REQUIRE(instance.get_top(top, true));
     BOOST_REQUIRE_EQUAL(top.height(), 2u);
+    BOOST_REQUIRE(top.hash() == block2->hash());
+
+    BOOST_REQUIRE(instance.get_top(out_header, out_height, true));
+    BOOST_REQUIRE_EQUAL(out_height, 2u);
+    BOOST_REQUIRE(out_header.hash() == block2->hash());
+
     BOOST_REQUIRE(instance.get_top(top, false));
     BOOST_REQUIRE_EQUAL(top.height(), 2u);
+    BOOST_REQUIRE(top.hash() == block2->hash());
+
+    BOOST_REQUIRE(instance.get_top(out_header, out_height, false));
+    BOOST_REQUIRE_EQUAL(out_height, 2u);
+    BOOST_REQUIRE(out_header.hash() == block2->hash());
 }
 
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
