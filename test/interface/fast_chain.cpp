@@ -206,6 +206,46 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_error___present_and_not__true_and_fa
     BOOST_REQUIRE_EQUAL(out_error, error::success);
 }
 
+BOOST_AUTO_TEST_CASE(block_chain__get_bits___present_and_not__true_and_false)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+
+    auto& database = instance.database();
+
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+    std::cerr << block1->header().bits() << std::endl;
+    std::cerr << block2->header().bits() << std::endl;
+
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+        std::make_shared<const message::header>(block2->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    database.invalidate(block1->header(), error::success);
+    database.update(*block1, 1);
+    const auto incoming_blocks = std::make_shared<const block_const_ptr_list>(block_const_ptr_list{ block1 });
+    const auto outgoing_blocks = std::make_shared<block_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_blocks, outgoing_blocks), error::success);
+
+    // Setup ends.
+
+    // Test conditions.
+    uint32_t out_bits;
+    BOOST_REQUIRE(instance.get_bits(out_bits, 2, true));
+    BOOST_REQUIRE_EQUAL(out_bits, block2->header().bits());
+
+    BOOST_REQUIRE(instance.get_bits(out_bits, 1, false));
+    BOOST_REQUIRE_EQUAL(out_bits, block1->header().bits());
+
+    BOOST_REQUIRE(!instance.get_bits(out_bits, 2, false));
+}
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
