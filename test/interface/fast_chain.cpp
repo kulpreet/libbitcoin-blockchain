@@ -172,6 +172,40 @@ BOOST_AUTO_TEST_CASE(block_chain__get_header2___present_and_not__true_and_false)
     BOOST_REQUIRE(out_header == block1->header());
 }
 
+BOOST_AUTO_TEST_CASE(block_chain__get_block_error___present_and_not__true_and_false)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+
+    auto& database = instance.database();
+
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    database.invalidate(block1->header(), error::success);
+    database.update(*block1, 1);
+    const auto incoming_blocks = std::make_shared<const block_const_ptr_list>(block_const_ptr_list{ block1 });
+    const auto outgoing_blocks = std::make_shared<block_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_blocks, outgoing_blocks), error::success);
+
+    // Setup ends.
+
+    // Test conditions.
+    code out_error;
+    BOOST_REQUIRE(!instance.get_block_error(out_error, block2->hash()));
+
+    BOOST_REQUIRE(instance.get_block_error(out_error, block1->hash()));
+    BOOST_REQUIRE_EQUAL(out_error, error::success);
+}
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
