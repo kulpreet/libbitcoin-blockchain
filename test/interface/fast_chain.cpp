@@ -282,32 +282,32 @@ BOOST_AUTO_TEST_CASE(block_chain__get_version___present_and_not__true_and_false)
     BOOST_REQUIRE(!instance.get_version(out_version, 2, false));
 }
 
-// BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__genesis_confirmed__zero)
-// {
-//     START_BLOCKCHAIN(instance, false);
+BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__genesis_confirmed__zero)
+{
+    START_BLOCKCHAIN(instance, false);
 
-//     uint256_t work;
-//     uint256_t overcome(max_uint64);
+    uint256_t work;
+    uint256_t overcome(max_uint64);
 
-//     // This is allowed and just returns zero (standard new single block).
-//     BOOST_REQUIRE(instance.get_work(work, overcome, 0, false));
-//     BOOST_REQUIRE_EQUAL(work, 0);
+    // This is allowed and just returns zero (standard new single block).
+    BOOST_REQUIRE(instance.get_work(work, overcome, 0, false));
+    BOOST_REQUIRE_EQUAL(work, 0);
 
-//     BOOST_REQUIRE(instance.get_work(work, overcome, 0, true));
-//     BOOST_REQUIRE_EQUAL(work, 0);
-// }
+    BOOST_REQUIRE(instance.get_work(work, overcome, 0, true));
+    BOOST_REQUIRE_EQUAL(work, 0);
+}
 
-// BOOST_AUTO_TEST_CASE(block_chain__get__work__height_above_top__true)
-// {
-//     START_BLOCKCHAIN(instance, false);
+BOOST_AUTO_TEST_CASE(block_chain__get__work__height_above_top__true)
+{
+    START_BLOCKCHAIN(instance, false);
 
-//     uint256_t work;
-//     uint256_t overcome(max_uint64);
+    uint256_t work;
+    uint256_t overcome(max_uint64);
 
-//     // This is allowed and just returns zero (standard new single block).
-//     BOOST_REQUIRE(instance.get_work(work, overcome, 1, false));
-//     BOOST_REQUIRE_EQUAL(work, 0);
-// }
+    // This is allowed and just returns zero (standard new single block).
+    BOOST_REQUIRE(instance.get_work(work, overcome, 1, false));
+    BOOST_REQUIRE_EQUAL(work, 0);
+}
 
 // NOTE: Old test, doesn't work now. Should be deleted?
 // BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__overcome_zero__true)
@@ -323,11 +323,9 @@ BOOST_AUTO_TEST_CASE(block_chain__get_version___present_and_not__true_and_false)
 //     BOOST_REQUIRE_EQUAL(work, genesis_mainnet_work);
 // }
 
-
 BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__maximum_one__true)
 {
     START_BLOCKCHAIN(instance, false);
-    static const uint64_t genesis_mainnet_work = 0x0000000100010001;
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -377,6 +375,41 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__unbounded__true)
 
     BOOST_REQUIRE(instance.get_work(work, overcome, 0, false));
     BOOST_REQUIRE_EQUAL(work, 0);
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__confirmed_unbounded__true)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+        std::make_shared<const message::header>(block2->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    database.invalidate(block1->header(), error::success);
+    database.update(*block1, 1);
+    database.invalidate(block2->header(), error::success);
+    database.update(*block2, 2);
+    const auto incoming_blocks = std::make_shared<const block_const_ptr_list>(block_const_ptr_list{ block1, block2 });
+    const auto outgoing_blocks = std::make_shared<block_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_blocks, outgoing_blocks), error::success);
+
+    uint256_t work;
+    uint256_t overcome(max_uint64);
+
+    // This should not exit early but skips the genesis block.
+    BOOST_REQUIRE(instance.get_work(work, overcome, 0, true));
+    BOOST_REQUIRE_EQUAL(work, block1->header().proof() + block2->header().proof());
+
+    BOOST_REQUIRE(instance.get_work(work, overcome, 0, false));
+    BOOST_REQUIRE_EQUAL(work, block1->header().proof() + block2->header().proof());
 }
 
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
