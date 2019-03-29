@@ -401,6 +401,8 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__confirmed_unbounded__true)
     const auto outgoing_blocks = std::make_shared<block_const_ptr_list>();
     BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_blocks, outgoing_blocks), error::success);
 
+    // Setup ends.
+
     uint256_t work;
     uint256_t overcome(max_uint64);
 
@@ -410,6 +412,80 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__confirmed_unbounded__true)
 
     BOOST_REQUIRE(instance.get_work(work, overcome, 0, false));
     BOOST_REQUIRE_EQUAL(work, block1->header().proof() + block2->header().proof());
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__not_present__false)
+{
+    START_BLOCKCHAIN(instance, false);
+
+    hash_digest out_hash;
+    BOOST_REQUIRE(!instance.get_downloadable(out_hash, 1));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_failed_state__false)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    const auto block1 = test::read_block(MAINNET_BLOCK1);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    database.invalidate(block1.header(), error::insufficient_fee);
+
+    // Setup ends.
+
+    hash_digest out_hash;
+    BOOST_REQUIRE(!instance.get_downloadable(out_hash, 1));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_with_transactions__false)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    const auto block1 = test::read_block(MAINNET_BLOCK1);
+    const auto block2 = test::read_block(MAINNET_BLOCK2);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    BOOST_REQUIRE_EQUAL(database.blocks().get(0, true).transaction_count(), 1);
+    // Setup ends.
+
+    hash_digest out_hash;
+    BOOST_REQUIRE(!instance.get_downloadable(out_hash, 0));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_no_transactions__true)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    auto block1 = test::read_block(MAINNET_BLOCK1);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 0);
+    // Setup ends.
+
+    hash_digest out_hash;
+    BOOST_REQUIRE(instance.get_downloadable(out_hash, 1));
+    BOOST_REQUIRE(out_hash == block1.hash());
 }
 
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
