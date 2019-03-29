@@ -63,4 +63,15 @@ void remove_test_directory(std::string directory)
     remove_all(directory, ec);
 }
 
+chain::transaction random_tx(size_t fudge)
+{
+    static const auto settings = system::settings(
+        system::config::settings::mainnet);
+    static const chain::block genesis = settings.genesis_block;
+    auto tx = genesis.transactions()[0];
+    tx.inputs()[0].previous_output().set_index(fudge);
+    tx.metadata.link = fudge;
+    return tx;
+}
+
 } // namespace test
