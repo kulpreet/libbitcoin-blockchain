@@ -206,6 +206,14 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_error___present_and_not__true_and_fa
     BOOST_REQUIRE_EQUAL(out_error, error::success);
 }
 
+BOOST_AUTO_TEST_CASE(block_chain__get_bits__not_found__false)
+{
+   START_BLOCKCHAIN(instance, false);
+
+   uint32_t out_bits;
+   BOOST_REQUIRE(!instance.get_bits(out_bits, 1, false));
+}
+
 BOOST_AUTO_TEST_CASE(block_chain__get_bits___present_and_not__true_and_false)
 {
     START_BLOCKCHAIN(instance, false);
@@ -243,6 +251,76 @@ BOOST_AUTO_TEST_CASE(block_chain__get_bits___present_and_not__true_and_false)
 
     BOOST_REQUIRE(!instance.get_bits(out_bits, 2, false));
 }
+
+BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__not_found__false)
+{
+   START_BLOCKCHAIN(instance, false);
+
+   uint32_t timestamp;
+   BOOST_REQUIRE(!instance.get_timestamp(timestamp, 1, true));
+   BOOST_REQUIRE(!instance.get_timestamp(timestamp, 1, false));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__found__true)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+
+    auto& database = instance.database();
+
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+        std::make_shared<const message::header>(block2->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    uint32_t timestamp;
+    BOOST_REQUIRE(instance.get_timestamp(timestamp, 1, true));
+    BOOST_REQUIRE_EQUAL(timestamp, block1->header().timestamp());
+
+    BOOST_REQUIRE(!instance.get_timestamp(timestamp, 1, false));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_version__not_found__false)
+{
+   START_BLOCKCHAIN(instance, false);
+
+   uint32_t version;
+   BOOST_REQUIRE(!instance.get_version(version, 1, false));
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__get_version__found__true)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+
+    auto& database = instance.database();
+
+    const auto block1 = NEW_BLOCK(1);
+    const auto block2 = NEW_BLOCK(2);
+
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1->header()),
+        std::make_shared<const message::header>(block2->header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+
+    uint32_t version;
+    BOOST_REQUIRE(instance.get_version(version, 1, true));
+    BOOST_REQUIRE_EQUAL(version, block1->header().version());
+
+    BOOST_REQUIRE(!instance.get_version(version, 1, false));
+}
+
 
 BOOST_AUTO_TEST_CASE(block_chain__get_version___present_and_not__true_and_false)
 {
@@ -553,65 +631,6 @@ BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_no_transactions__tru
 ////////    BOOST_REQUIRE_EQUAL(height, 1u);
 ////////}
 ////
-////BOOST_AUTO_TEST_CASE(block_chain__get_bits__not_found__false)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    uint32_t bits;
-////    BOOST_REQUIRE(!instance.get_bits(bits, 1, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(block_chain__get_bits__found__true)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    const auto block1 = NEW_BLOCK(1);
-////    BOOST_REQUIRE(instance.push(block1, 1, 0));
-////
-////    uint32_t bits;
-////    BOOST_REQUIRE(instance.get_bits(bits, 1, false));
-////    BOOST_REQUIRE_EQUAL(bits, block1->header().bits());
-////}
-////
-////BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__not_found__false)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    uint32_t timestamp;
-////    BOOST_REQUIRE(!instance.get_timestamp(timestamp, 1, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__found__true)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    const auto block1 = NEW_BLOCK(1);
-////    BOOST_REQUIRE(instance.push(block1, 1, 0));
-////
-////    uint32_t timestamp;
-////    BOOST_REQUIRE(instance.get_timestamp(timestamp, 1, false));
-////    BOOST_REQUIRE_EQUAL(timestamp, block1->header().timestamp());
-////}
-////
-////BOOST_AUTO_TEST_CASE(block_chain__get_version__not_found__false)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    uint32_t version;
-////    BOOST_REQUIRE(!instance.get_version(version, 1, false));
-////}
-////
-////BOOST_AUTO_TEST_CASE(block_chain__get_version__found__true)
-////{
-////    START_BLOCKCHAIN(instance, false);
-////
-////    const auto block1 = NEW_BLOCK(1);
-////    BOOST_REQUIRE(instance.push(block1, 1, 0));
-////
-////    uint32_t version;
-////    BOOST_REQUIRE(instance.get_version(version, 1, false));
-////    BOOST_REQUIRE_EQUAL(version, block1->header().version());
-////}
 ////
 ////BOOST_AUTO_TEST_CASE(block_chain__populate_output__not_found__false)
 ////{
