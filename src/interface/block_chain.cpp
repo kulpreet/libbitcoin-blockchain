@@ -220,7 +220,7 @@ bool block_chain::get_work(uint256_t& out_work, const uint256_t& overcome,
     const auto no_maximum = overcome.is_zero();
 
     for (auto height = top; (height > above_height) &&
-        (no_maximum || out_work <= overcome); --height)
+        (no_maximum || out_work < overcome); --height)
     {
         const auto result = database_.blocks().get(height, candidate);
 

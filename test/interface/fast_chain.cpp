@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__maximum_one__true)
     BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
 
     uint256_t work;
-    uint256_t overcome(block1->header().proof() - 1);
+    uint256_t overcome(block1->header().proof());
 
     // This should not exit early due to tying on the first block (order matters).
     BOOST_REQUIRE(instance.get_work(work, overcome, 0, true));
