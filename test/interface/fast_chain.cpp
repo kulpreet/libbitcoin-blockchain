@@ -668,6 +668,116 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_with_transactions__tr
     BOOST_REQUIRE(out_hash == block1.hash());
 }
 
+BOOST_AUTO_TEST_CASE(block_chain__populate_header__present__success)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    auto block1 = test::read_block(MAINNET_BLOCK1);
+    auto header1 {block1.header()};
+    BOOST_REQUIRE(!header1.metadata.candidate);
+    block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+    BOOST_REQUIRE(bc::database::is_candidate(database.blocks().get(1, true).state()));
+    database.update(block1, 1);
+    BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 2);
+
+    // Setup ends.
+
+    instance.populate_header(header1);
+    BOOST_REQUIRE(header1.metadata.candidate);
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__populate_block_transaction__present__success)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    auto block1 = test::read_block(MAINNET_BLOCK1);
+    auto header1 {block1.header()};
+    block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
+
+    auto transaction1 = block1.transactions().front();
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+    BOOST_REQUIRE(bc::database::is_candidate(database.blocks().get(1, true).state()));
+    database.update(block1, 1);
+    BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 2);
+
+    // Setup ends.
+
+    instance.populate_block_transaction(transaction1, 1, 1);
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__populate_pool_transaction__present__success)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    auto block1 = test::read_block(MAINNET_BLOCK1);
+    auto header1 {block1.header()};
+    block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
+
+    auto transaction1 = block1.transactions().front();
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+    BOOST_REQUIRE(bc::database::is_candidate(database.blocks().get(1, true).state()));
+    database.update(block1, 1);
+    BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 2);
+
+    // Setup ends.
+
+    instance.populate_pool_transaction(transaction1, 1);
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__populate_block_output__present__success)
+{
+    START_BLOCKCHAIN(instance, false);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    auto& database = instance.database();
+    auto block1 = test::read_block(MAINNET_BLOCK1);
+    auto header1 {block1.header()};
+    block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
+
+    auto transaction1 = block1.transactions().front();
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+    const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
+    {
+        std::make_shared<const message::header>(block1.header()),
+    });
+    const auto outgoing_headers = std::make_shared<header_const_ptr_list>();
+    BOOST_REQUIRE_EQUAL(database.reorganize({genesis.hash(), 0}, incoming_headers, outgoing_headers), error::success);
+    BOOST_REQUIRE(bc::database::is_candidate(database.blocks().get(1, true).state()));
+    database.update(block1, 1);
+    BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 2);
+
+    // Setup ends.
+
+    instance.populate_pool_transaction(transaction1, 1);
+    BOOST_REQUIRE(!transaction1.metadata.candidate);
+}
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
