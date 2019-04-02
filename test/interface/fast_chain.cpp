@@ -674,8 +674,6 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_header__present__success)
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
     auto block1 = test::read_block(MAINNET_BLOCK1);
-    auto header1 {block1.header()};
-    BOOST_REQUIRE(!header1.metadata.candidate);
     block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
     const auto incoming_headers = std::make_shared<const header_const_ptr_list>(header_const_ptr_list
     {
@@ -686,6 +684,9 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_header__present__success)
     BOOST_REQUIRE(bc::database::is_candidate(database.blocks().get(1, true).state()));
     database.update(block1, 1);
     BOOST_REQUIRE_EQUAL(database.blocks().get(1, true).transaction_count(), 2);
+
+    auto& header1 = block1.header();
+    BOOST_REQUIRE(!header1.metadata.candidate);
 
     // Setup ends.
 
@@ -700,7 +701,6 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_block_transaction__present__success)
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
     auto block1 = test::read_block(MAINNET_BLOCK1);
-    auto header1 {block1.header()};
     block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
 
     auto transaction1 = block1.transactions().front();
@@ -728,7 +728,6 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_pool_transaction__present__success)
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
     auto block1 = test::read_block(MAINNET_BLOCK1);
-    auto header1 {block1.header()};
     block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
 
     auto transaction1 = block1.transactions().front();
@@ -756,7 +755,6 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_block_output__present__success)
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
     auto block1 = test::read_block(MAINNET_BLOCK1);
-    auto header1 {block1.header()};
     block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
 
     auto transaction1 = block1.transactions().front();
@@ -786,7 +784,6 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_pool_output__present__success)
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
     auto block1 = test::read_block(MAINNET_BLOCK1);
-    auto header1 {block1.header()};
     block1.set_transactions({ test::random_tx(0), test::random_tx(1) });
 
     auto transaction1 = block1.transactions().front();
