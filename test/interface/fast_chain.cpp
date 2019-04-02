@@ -939,6 +939,16 @@ BOOST_AUTO_TEST_CASE(block_chain__get_candidate__present_with_transactions__succ
     BOOST_REQUIRE(block->transactions().size() == 2);
 }
 
+BOOST_AUTO_TEST_CASE(block_chain__get_header__not_present__missing)
+{
+    START_BLOCKCHAIN(instance, false);
+
+    // Setup ends.
+
+    const auto block = instance.get_header(10, true);
+    BOOST_REQUIRE(block == nullptr);
+}
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
