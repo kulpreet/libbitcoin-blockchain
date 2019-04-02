@@ -946,6 +946,43 @@ BOOST_AUTO_TEST_CASE(block_chain__get_header__not_present__missing)
     BOOST_REQUIRE(block == nullptr);
 }
 
+// Writers.
+
+BOOST_AUTO_TEST_CASE(block_chain__store__no_state__failure)
+{
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
+{
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
+{
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__store__without_cataloging__success)
+{
+    // Transaction is present in database.
+    // Transaction metadata state is updated.
+    // Last pool transaction is updated.
+    // Transaction subscriber is invoked.
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_existed__failure)
+{
+    // Transaction is not cataloged.
+}
+
+BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_not_existed__failure)
+{
+    // Transaction is present in database.
+    // Transaction metadata state is updated.
+    // Last pool transaction is updated.
+    // Transaction subscriber is invoked.
+    // Transaction is cataloged.
+}
+
+
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
 ////    START_BLOCKCHAIN(instance, true);
