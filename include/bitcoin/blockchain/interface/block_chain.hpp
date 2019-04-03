@@ -405,6 +405,9 @@ protected:
     // This is protected by mutex.
     database::data_base database_;
 
+    // Made protected for testing.
+    system::atomic<system::transaction_const_ptr> last_pool_transaction_;
+
 private:
     // Properties.
     system::uint256_t candidate_work() const;
@@ -439,7 +442,6 @@ private:
     system::atomic<system::uint256_t> candidate_work_;
     system::atomic<system::uint256_t> confirmed_work_;
     system::atomic<system::block_const_ptr> last_confirmed_block_;
-    system::atomic<system::transaction_const_ptr> last_pool_transaction_;
     system::atomic<system::chain::chain_state::ptr> top_candidate_state_;
     system::atomic<system::chain::chain_state::ptr> top_valid_candidate_state_;
     system::atomic<system::chain::chain_state::ptr> next_confirmed_state_;

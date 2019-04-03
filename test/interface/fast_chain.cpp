@@ -44,6 +44,11 @@ public:
     {
         return database_;
     }
+
+    transaction_const_ptr last_pool_transaction() const
+    {
+        return last_pool_transaction_.load();
+    }
 };
 
 class fast_chain_setup_fixture
@@ -971,6 +976,7 @@ BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
     transaction->metadata.state = instance.next_confirmed_state();
 
     // Setup ends.
+
 #ifndef NDEBUG
     BOOST_REQUIRE_EQUAL(instance.store(transaction), error::duplicate_transaction);
 #else
@@ -980,10 +986,31 @@ BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
 
 BOOST_AUTO_TEST_CASE(block_chain__store__without_cataloging__success)
 {
+    START_BLOCKCHAIN(instance, false, false);
+    auto& database = instance.database();
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1);
+    auto transaction = std::make_shared<const message::transaction>(genesis.transactions()[0]);
+    const auto initial_state = instance.next_confirmed_state();
+    transaction->metadata.state = initial_state;
+
+    // Setup ends.
+
+    BOOST_REQUIRE(instance.store(transaction));
+
     // Transaction is present in database.
+    const auto reloaded = database.transactions().get(transaction->hash());
+    BOOST_REQUIRE(reloaded);
+
+    const auto reloaded_transaction = reloaded.transaction();
     // Transaction metadata state is updated.
+    BOOST_REQUIRE_EQUAL(reloaded_transaction.metadata.state, initial_state);
+
     // Last pool transaction is updated.
-    // Transaction subscriber is invoked.
+    BOOST_REQUIRE(instance.last_pool_transaction()->hash() == transaction->hash());
+
+    // invoke() called on transaction subscriber.
 }
 
 BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_existed__failure)
@@ -991,7 +1018,7 @@ BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_existed__fa
     // Transaction is not cataloged.
 }
 
-BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_not_existed__failure)
+BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_not_existed__success)
 {
     // Transaction is present in database.
     // Transaction metadata state is updated.
