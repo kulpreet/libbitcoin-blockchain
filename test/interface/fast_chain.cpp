@@ -991,24 +991,25 @@ BOOST_AUTO_TEST_CASE(block_chain__store__without_cataloging__success)
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1);
-    auto transaction = std::make_shared<const message::transaction>(genesis.transactions()[0]);
+    auto transaction = std::make_shared<const message::transaction>(test::random_tx(0));
     const auto initial_state = instance.next_confirmed_state();
     transaction->metadata.state = initial_state;
 
     // Setup ends.
 
-    BOOST_REQUIRE(instance.store(transaction));
+    BOOST_REQUIRE_EQUAL(instance.store(transaction), error::success);
 
     // Transaction is present in database.
     const auto reloaded = database.transactions().get(transaction->hash());
     BOOST_REQUIRE(reloaded);
 
     const auto reloaded_transaction = reloaded.transaction();
-    // Transaction metadata state is updated.
-    BOOST_REQUIRE_EQUAL(reloaded_transaction.metadata.state, initial_state);
+
+    // Transaction metadata says existed.
+    BOOST_REQUIRE(reloaded_transaction.metadata.existed);
 
     // Last pool transaction is updated.
-    BOOST_REQUIRE(instance.last_pool_transaction()->hash() == transaction->hash());
+    BOOST_REQUIRE(instance.last_pool_transaction() == transaction);
 
     // invoke() called on transaction subscriber.
 }
