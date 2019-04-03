@@ -971,8 +971,11 @@ BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
     transaction->metadata.state = instance.next_confirmed_state();
 
     // Setup ends.
-
+#ifndef NDEBUG
     BOOST_REQUIRE_EQUAL(instance.store(transaction), error::duplicate_transaction);
+#else
+    BOOST_REQUIRE(!instance.store(transaction));
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(block_chain__store__without_cataloging__success)
