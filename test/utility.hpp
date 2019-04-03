@@ -48,17 +48,17 @@
 #define TEST_NAME \
     std::string(boost::unit_test::framework::current_test_case().p_name)
 
-#define START_BLOCKCHAIN(name, flush)                                          \
-    threadpool pool;                                                           \
-    database::settings database_settings;                                      \
-    database_settings.flush_writes = flush;                                    \
-    database_settings.directory = TEST_NAME;                                   \
-    BOOST_REQUIRE(test::create_database(database_settings));                   \
-    blockchain::settings blockchain_settings;                                  \
-    bc::system::settings bitcoin_settings;                                     \
-    block_chain_accessor name(                                                 \
-        pool, blockchain_settings, database_settings, bitcoin_settings);       \
-    BOOST_REQUIRE(name.start())
+#define START_BLOCKCHAIN(name, flush, index_payments)                          \
+  threadpool pool;                                                             \
+  database::settings database_settings;                                        \
+  database_settings.flush_writes = flush;                                      \
+  database_settings.directory = TEST_NAME;                                     \
+  BOOST_REQUIRE(test::create_database(database_settings, index_payments));     \
+  blockchain::settings blockchain_settings;                                    \
+  bc::system::settings bitcoin_settings;                                       \
+  block_chain_accessor name(pool, blockchain_settings, database_settings,      \
+                            bitcoin_settings);                                 \
+  BOOST_REQUIRE(name.start())
 
 #define NEW_BLOCK(height) \
     std::make_shared<const message::block>(test::read_block(MAINNET_BLOCK##height))
@@ -66,7 +66,7 @@
 namespace test {
 
 bc::system::chain::block read_block(const std::string& hex);
-bool create_database(bc::database::settings& out_database);
+bool create_database(bc::database::settings& out_database, bool index_payments);
 void remove_test_directory(std::string name);
 bc::system::chain::transaction random_tx(size_t fudge);
 

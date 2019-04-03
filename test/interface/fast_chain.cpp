@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_SUITE(fast_chain_tests, fast_chain_setup_fixture)
 
 BOOST_AUTO_TEST_CASE(block_chain__getters__candidate_and_confirmed__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(block_chain__getters__candidate_and_confirmed__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_header2___present_and_not__true_and_false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_header2___present_and_not__true_and_false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_block_error___present_and_not__true_and_false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_error___present_and_not__true_and_fa
 
 BOOST_AUTO_TEST_CASE(block_chain__get_bits__not_found__false)
 {
-   START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
    uint32_t out_bits;
    BOOST_REQUIRE(!instance.get_bits(out_bits, 1, false));
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_bits__not_found__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_bits___present_and_not__true_and_false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_bits___present_and_not__true_and_false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__not_found__false)
 {
-   START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
    uint32_t timestamp;
    BOOST_REQUIRE(!instance.get_timestamp(timestamp, 1, true));
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__not_found__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__found__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_timestamp__found__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_version__not_found__false)
 {
-   START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
    uint32_t version;
    BOOST_REQUIRE(!instance.get_version(version, 1, false));
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_version__not_found__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_version__found__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_version__found__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_version___present_and_not__true_and_false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
 
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_version___present_and_not__true_and_false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__genesis_confirmed__zero)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     uint256_t work;
     uint256_t overcome(max_uint64);
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__genesis_confirmed__zero)
 
 BOOST_AUTO_TEST_CASE(block_chain__get__work__height_above_top__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     uint256_t work;
     uint256_t overcome(max_uint64);
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get__work__height_above_top__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__maximum_one__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__maximum_one__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__unbounded__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -456,7 +456,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__unbounded__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__confirmed_unbounded__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -493,7 +493,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_branch_work__confirmed_unbounded__true)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__not_present__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     hash_digest out_hash;
     BOOST_REQUIRE(!instance.get_downloadable(out_hash, 1));
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__not_present__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_failed_state__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_failed_state__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_with_transactions__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -545,7 +545,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_with_transactions__f
 
 BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_with_transactions__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -569,7 +569,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_downloadable__present_with_transactions__t
 
 BOOST_AUTO_TEST_CASE(block_chain__get_validatable__not_present__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     hash_digest out_hash;
     BOOST_REQUIRE(!instance.get_validatable(out_hash, 1));
@@ -577,7 +577,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__not_present__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_and_failed_state__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -599,7 +599,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_and_failed_state__fal
 
 BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_and_valid__false)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -621,7 +621,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_and_valid__false)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_without_transactions__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -644,7 +644,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_without_transactions_
 
 BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_with_transactions__true)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -669,7 +669,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_validatable__present_with_transactions__tr
 
 BOOST_AUTO_TEST_CASE(block_chain__populate_header__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -696,7 +696,7 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_header__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__populate_block_transaction__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -723,7 +723,7 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_block_transaction__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__populate_pool_transaction__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -750,7 +750,7 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_pool_transaction__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__populate_block_output__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -779,7 +779,7 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_block_output__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__populate_pool_output__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -808,7 +808,7 @@ BOOST_AUTO_TEST_CASE(block_chain__populate_pool_output__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_block_state__not_present__missing)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     // Setup ends.
 
@@ -818,7 +818,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_state__not_present__missing)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_block_state__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -843,7 +843,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_state__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_block_state2__not_present__missing)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     // Setup ends.
 
@@ -853,7 +853,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_state2__not_present__missing)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_block_state2__present__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -878,7 +878,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_block_state2__present__success)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_candidate__not_present__missing)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     // Setup ends.
 
@@ -888,7 +888,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_candidate__not_present__missing)
 
 BOOST_AUTO_TEST_CASE(block_chain__get_candidate__present_without_transactions__missing)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -912,7 +912,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_candidate__present_without_transactions__m
 
 BOOST_AUTO_TEST_CASE(block_chain__get_candidate__present_with_transactions__success)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     auto& database = instance.database();
@@ -938,7 +938,7 @@ BOOST_AUTO_TEST_CASE(block_chain__get_candidate__present_with_transactions__succ
 
 BOOST_AUTO_TEST_CASE(block_chain__get_header__not_present__missing)
 {
-    START_BLOCKCHAIN(instance, false);
+    START_BLOCKCHAIN(instance, false, true);
 
     // Setup ends.
 
@@ -950,14 +950,29 @@ BOOST_AUTO_TEST_CASE(block_chain__get_header__not_present__missing)
 
 BOOST_AUTO_TEST_CASE(block_chain__store__no_state__failure)
 {
+    START_BLOCKCHAIN(instance, false, true);
+    auto& database = instance.database();
+    auto transaction = std::make_shared<const message::transaction>(test::random_tx(0));
+    BOOST_REQUIRE(!transaction->metadata.state);
+
+    // Setup ends.
+
+    BOOST_REQUIRE_EQUAL(instance.store(transaction), error::operation_failed);
+    BOOST_REQUIRE(!database.transactions().get(transaction->hash()));
 }
 
 BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
 {
-}
+    START_BLOCKCHAIN(instance, false, true);
+    const auto bc_settings = bc::system::settings(config::settings::mainnet);
+    const chain::block& genesis = bc_settings.genesis_block;
+    BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1);
+    auto transaction = std::make_shared<const message::transaction>(genesis.transactions()[0]);
+    transaction->metadata.state = instance.next_confirmed_state();
 
-BOOST_AUTO_TEST_CASE(block_chain__store__duplicate_transaction__failure)
-{
+    // Setup ends.
+
+    BOOST_REQUIRE_EQUAL(instance.store(transaction), error::duplicate_transaction);
 }
 
 BOOST_AUTO_TEST_CASE(block_chain__store__without_cataloging__success)

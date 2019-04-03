@@ -40,7 +40,7 @@ chain::block read_block(const std::string& hex)
     return result;
 }
 
-bool create_database(database::settings& out_database)
+bool create_database(database::settings& out_database, bool index_payments)
 {
     static const auto mainnet = config::settings::mainnet;
 
@@ -52,7 +52,7 @@ bool create_database(database::settings& out_database)
 
     error_code ec;
     remove_all(out_database.directory, ec);
-    database::data_base database(out_database, true);
+    database::data_base database(out_database, index_payments);
     return create_directories(out_database.directory, ec) &&
         database.create(system::settings(mainnet).genesis_block);
 }
