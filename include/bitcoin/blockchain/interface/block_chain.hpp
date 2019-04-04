@@ -394,7 +394,7 @@ protected:
     bool stopped() const;
 
     // Notification senders.
-    void notify(system::transaction_const_ptr tx);
+    virtual void notify(system::transaction_const_ptr tx);
     void notify(size_t fork_height,
         system::header_const_ptr_list_const_ptr incoming,
         system::header_const_ptr_list_const_ptr outgoing);
@@ -407,6 +407,7 @@ protected:
 
     // Made protected for testing.
     system::atomic<system::transaction_const_ptr> last_pool_transaction_;
+    virtual void catalog_transaction(system::transaction_const_ptr tx);
 
 private:
     // Properties.
@@ -429,7 +430,6 @@ private:
 
     // Utilities.
     void catalog_block(system::block_const_ptr block);
-    void catalog_transaction(system::transaction_const_ptr tx);
     bool get_transactions(system::chain::transaction::list& out_transactions,
         const database::block_result& result, bool witness) const;
     bool get_transaction_hashes(system::hash_list& out_hashes,
