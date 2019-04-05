@@ -26,7 +26,9 @@ using namespace bc::system;
 using namespace bc::blockchain;
 using namespace bc::database;
 
-#define TEST_SET_NAME \
+#define OUTPUT_SCRIPT0 "dup hash160 [58350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig"
+
+#define TEST_SET_NAME                           \
    "fast_chain_tests"
 
 class block_chain_accessor
@@ -41,7 +43,6 @@ public:
         const system::settings& bitcoin_settings)
       : block_chain(pool, settings, database_settings, bitcoin_settings)
     {
-        std::cerr << "In cons...." << std::endl;
     }
 
     bool start()
@@ -1044,7 +1045,28 @@ BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_existed__fa
     const auto bc_settings = bc::system::settings(config::settings::mainnet);
     const chain::block& genesis = bc_settings.genesis_block;
     BOOST_REQUIRE_EQUAL(genesis.transactions().size(), 1);
-    auto transaction = std::make_shared<const message::transaction>(test::random_tx(0));
+
+
+    uint32_t version = 2345u;
+    uint32_t locktime = 0xffffffff;
+
+    chain::script script0;
+    script0.from_string(OUTPUT_SCRIPT0);
+    const auto script_hash0 = sha256_hash(script0.to_data(false));
+
+    const chain::input::list inputs
+    {
+        { chain::point{ null_hash, chain::point::null_index }, {}, 0 }
+    };
+
+    const chain::output::list outputs
+    {
+        { 1200, script0 }
+    };
+
+    chain::transaction tx{ version, locktime, inputs, outputs };
+
+    auto transaction = std::make_shared<const message::transaction>(tx);
     const auto initial_state = instance.next_confirmed_state();
     transaction->metadata.state = initial_state;
 
@@ -1064,7 +1086,6 @@ BOOST_AUTO_TEST_CASE(block_chain__store__with_cataloging_tx_metadata_not_existed
     // Transaction subscriber is invoked.
     // Transaction is cataloged.
 }
-
 
 ////BOOST_AUTO_TEST_CASE(block_chain__push__flushed__expected)
 ////{
